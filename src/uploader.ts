@@ -5,7 +5,7 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-export const uploadReel = async (path) => {
+export const uploadReel = async (path: string) => {
   const IG_USERNAME = process.env.IG_USERNAME || '';
   const IG_PASSWORD = process.env.IG_PASSWORD || '';
 

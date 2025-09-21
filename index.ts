@@ -1,35 +1,44 @@
 import { Scraper } from "@the-convocation/twitter-scraper";
 import { getMediaUrl, hasMedia } from "./src/finder";
 import { getTweetById, saveMediaByUrl, saveTweet } from "./src/storage";
-import { uploadReel } from "./src/uploader";
+import cron from 'node-cron'
+import { getDate } from "./src/helper";
 
-const userNames = ['memes', 'JMilei', 'NoContextCrap'];
-const index = 2
+const userNames = ['JMilei', 'NoContextCrap'];
+const index = 1;
 
 const scraper = new Scraper();
 
 const getTweets = async (username: string) => {
-    console.log("[ACCOUNT] >", username);
+    console.log(`[${getDate()}] >`, username);
     const tweets = await scraper.getTweets(username, 20);
     return tweets;
 }
 
-const list = await getTweets(userNames[index])
+const run = async () => {
+    const list = await getTweets(userNames[index]);
+    let counter = 0
 
-for await (const tweet of list) {
-    if (hasMedia(tweet) === false) continue;
-    if (getTweetById(tweet.id as string)) continue;
-    // 
-    const { videos } = getMediaUrl(tweet);
-    // const url = videos[0];
 
-    videos.forEach(async (url) => {
-    const path = await saveMediaByUrl(url)
+    for await (const tweet of list) {
+        if (hasMedia(tweet) === false) continue;
+        if (getTweetById(tweet.id as string)) continue;
+        const { videos } = getMediaUrl(tweet);
 
-    // await uploadReel(path);
 
-    await saveTweet(tweet);
+        videos.forEach(async (url) => {
+            const path = await saveMediaByUrl(url)
+            // await uploadReel(path);
 
-    console.log(path);
-    });
+            await saveTweet(tweet);
+        });
+
+        counter++;
+    }
+    console.log(`[${getDate()}] > Saved ${counter} tweets from ${userNames[index]}`);
 }
+await run()
+
+cron.schedule('0 0 * * *', async () => {
+    await run()
+})
