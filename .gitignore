@@ -1,5 +1,7 @@
 media/*
-tweets.json
+profile/*
+profile_h3/*
+# tweets.json
 
 # Logs
 logs
