@@ -1,8 +1,8 @@
 import { Scraper } from "@the-convocation/twitter-scraper";
-import { getMediaUrl, hasMedia } from "./src/finder";
-import { getTweetById, saveMediaByUrl, saveTweet } from "./src/storage";
+import { getMediaUrl, hasMedia } from "./finder";
+import { getTweetById, saveMediaByUrl, saveTweet } from "./storage"
 import cron from 'node-cron'
-import { getDate } from "./src/helper";
+import { getDate } from "./helper";
 
 const userNames = ['JMilei', 'NoContextCrap'];
 const index = 1;
@@ -37,7 +37,7 @@ const run = async () => {
     }
     console.log(`[${getDate()}] > Saved ${counter} tweets from ${userNames[index]}`);
 }
-await run()
+run()
 
 cron.schedule('0 0 * * *', async () => {
     await run()
