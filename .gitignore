@@ -1,3 +1,6 @@
+media/*
+tweets.json
+
 # Logs
 logs
 *.log
