@@ -18,11 +18,9 @@ const shareReel = async (path: string, text: string) => {
     const page = await openInstagram()
     const botonNewPost = await page.$('svg[aria-label="New post"]');
     await botonNewPost?.click();
-    // const botonPost = await page.$('svg[aria-label="Post"]');
-    // await botonPost.click();
 
-    // const selectButton = await page.waitForSelector('button._aswp._aswr._aswu._asw_._asx2', { visible: true });
-    // await selectButton?.click();
+    // Boton "Post"
+    await page.click('a svg[aria-label="Post"]');
 
     const selector = 'input[type="file"][accept*="image"],input[type="file"][accept*="video"]'
     await page.waitForSelector(selector, { visible: false })
@@ -48,8 +46,6 @@ const shareReel = async (path: string, text: string) => {
     await page.waitForSelector(shareDiv)
     await page.click(shareDiv)
 
-    // Esperar a que cargue
-    // await page.waitForNetworkIdle({ idleTime: 1500, timeout: 60000 });
     await delay(22000)
     
     return true

@@ -1,41 +1,44 @@
-import { Scraper } from "@the-convocation/twitter-scraper";
-import { getMediaUrl, hasMedia } from "./handlers/finder";
-import { getTweetById, saveMediaByUrl, saveTweet } from "./handlers/storage"
+import { getMediaUrl } from "./handlers/finder";
+import { saveMediaByUrl, saveTweet } from "./handlers/storage"
 import cron from 'node-cron'
 import { getDate } from "./handlers/helper";
-import { openInstagram, shareReel } from "./handlers/instagram";
+import { shareReel } from "./handlers/instagram";
+import { startBot } from "./handlers/telegram";
+import { getNewTweets } from "./handlers/twitter";
+import path from "path"
+import dotenv from 'dotenv';
 
-const userNames = ['JMilei', 'NoContextCrap'];
-const index = 1;
+dotenv.config();
 
-const scraper = new Scraper();
+const userNames = process.env.USER_NAMES?.split(',') || [];
+const index = 2;
 
+const quantity = 1
 
-const getTweets = async (username: string) => {
-    console.log(`[${getDate()}] >`, username);
-    const tweets = await scraper.getTweets(username, 10);
-    return tweets;
-}
+const bot = await startBot()
+const CHAT_ID = process.env.CHAT_ID
 
 const run = async () => {
-    const list = await getTweets(userNames[index]);
+    const list = await getNewTweets(userNames[index], quantity);
     let counter = 0
 
-
     for await (const tweet of list) {
-        if (hasMedia(tweet) === false) continue;
-        if (getTweetById(tweet.id as string)) continue;
         const { videos } = getMediaUrl(tweet);
 
-        // const url = videos[0]
-
         for (const url of videos) {
-            const path = await saveMediaByUrl(url)
+            const ruta = await saveMediaByUrl(url)
 
+            await shareReel(ruta, 'hello world')
             await saveTweet(tweet);
-            // console.log(path)
-            // return
-            await shareReel(path, 'hello world')
+            console.log("[TWEET SAVED] >", tweet.id);
+            console.log(ruta)
+
+            // const p = path.resolve(ruta)
+            // await bot.sendVideo(
+            //     CHAT_ID,
+            //     p,
+            //     { caption: `${ruta}` }
+            // )
         }
 
         counter++;
@@ -44,10 +47,8 @@ const run = async () => {
 
 }
 
-
-// openInstagram()
 run()
 
-// cron.schedule('*/10 * * * *', async () => {
-//     await run()
-// })
+cron.schedule('*/10 * * * *', async () => {
+    await run()
+})
